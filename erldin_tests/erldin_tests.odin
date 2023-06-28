@@ -5,9 +5,8 @@ import "core:fmt"
 import "core:os"
 import "core:mem"
 import "core:log"
-import "core:runtime"
 
-import "../erldin"
+// import "../erldin"
 
 TEST_count := 0
 TEST_fail := 0
@@ -44,30 +43,10 @@ expect_no_leaks :: proc(t: ^testing.T, allocator: mem.Tracking_Allocator) {
 main :: proc() {
   context.logger = log.create_console_logger()
 
-  t := testing.T{}
-
-  test_find_paths(&t)
+  // t := testing.T{}
 
   fmt.printf("%v\n\t%v/%v tests successful.\n", #location(), TEST_count - TEST_fail, TEST_count)
   if TEST_fail > 0 {
     os.exit(1)
   }
-}
-
-test_find_paths :: proc(t: ^testing.T) {
-  tracking_allocator := mem.Tracking_Allocator{}
-  mem.tracking_allocator_init(&tracking_allocator, runtime.default_allocator())
-  context.allocator = mem.tracking_allocator(&tracking_allocator)
-  defer expect_no_leaks(t, tracking_allocator)
-
-  os.set_env("ERLANG_USR", "")
-
-  paths, err := erldin.find_paths()
-  expect(
-    t,
-    err == erldin.NoEnvironmentVariableSet{key = "ERLANG_USR"},
-    "err != NoEnvironmentVariableSet",
-  )
-  expect(t, paths.include == "", "paths.include != \"\"")
-  expect(t, paths.lib == "", "paths.lib != \"\"")
 }

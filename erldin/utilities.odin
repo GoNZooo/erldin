@@ -1,8 +1,7 @@
 package erldin
 
-import "core:os"
 import "core:mem"
-import "core:strings"
+import "core:c"
 
 Paths :: struct {
   include: string,
@@ -18,14 +17,61 @@ NoEnvironmentVariableSet :: struct {
   key: string,
 }
 
-find_paths :: proc(allocator := context.allocator) -> (paths: Paths, error: FindPathsError) {
-  env_directory := os.get_env("ERLANG_USR", allocator)
-  if env_directory == "" {
-    return Paths{}, NoEnvironmentVariableSet{key = "ERLANG_USR"}
-  }
+foreign import erldin "erldin_nif.h"
+foreign erldin {
+  enif_make_string :: proc(env: ^ErlNifEnv, string: cstring, encoding: c.uint) -> ERL_NIF_TERM ---
+}
 
-  include_directory := strings.concatenate({env_directory, "/include"}, allocator) or_return
-  lib_directory := strings.concatenate({env_directory, "/lib"}, allocator) or_return
+ErlNifResourceTypeInit :: struct {
+  dtor:    rawptr,
+  stop:    rawptr,
+  down:    rawptr,
+  members: c.int,
+  dyncall: rawptr,
+}
 
-  return Paths{include = include_directory, lib = lib_directory}, nil
+ErlNifEntry :: struct {
+  major:                         c.int,
+  minor:                         c.int,
+  name:                          cstring,
+  num_of_funcs:                  c.int,
+  funcs:                         [^]ErlNifFunc,
+  load:                          LoadFunction,
+  reload:                        ReloadFunction,
+  upgrade:                       UpgradeFunction,
+  unload:                        UnloadFunction,
+  vm_variant:                    cstring,
+  options:                       c.uint,
+  sizeof_ErlNifResourceTypeInit: c.size_t,
+  min_erts:                      cstring,
+}
+
+ErlNifEnv :: rawptr
+
+ERL_NIF_TERM :: c.uint
+
+LoadFunction :: proc(env: ^ErlNifEnv, priv_data: [^]rawptr, load_info: ERL_NIF_TERM) -> c.int
+
+ReloadFunction :: proc(env: ^ErlNifEnv, priv_data: [^]rawptr, load_info: ERL_NIF_TERM) -> c.int
+
+UpgradeFunction :: proc(
+  env: ^ErlNifEnv,
+  priv_data: [^]rawptr,
+  old_priv_data: [^]rawptr,
+  load_info: ERL_NIF_TERM,
+) -> c.int
+
+UnloadFunction :: proc(env: ^ErlNifEnv, priv_data: rawptr)
+
+ErlNifFunc :: struct {
+  name:  cstring,
+  arity: c.uint,
+  fptr:  Nif,
+  flags: c.uint,
+}
+
+Nif :: proc(env: ^ErlNifEnv, argc: c.int, argv: [^]ERL_NIF_TERM) -> ERL_NIF_TERM
+
+encoding :: enum u32 {
+  ERL_NIF_LATIN1 = 1,
 }
