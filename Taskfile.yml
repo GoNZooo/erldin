@@ -7,6 +7,17 @@ tasks:
     cmds:
       - task: tests
     silent: true
+  build:
+    deps: [build_hello_world_nif]
+    aliases: [b]
+  build_hello_world_nif:
+    cmds:
+      - odin build hello_from_odin -reloc-mode=pic -build-mode:shared
+    generates:
+      - ./hello_from_odin.so
+    sources:
+      - ./hello_from_odin/*
+    silent: true
   tests:
     deps: [main_tests]
     aliases: [t]
@@ -18,5 +29,9 @@ tasks:
       - ./erldin/*
       - ./erldin_tests/*
     aliases: [et]
+  clean:
+    cmds:
+      - rm -rf ./hello_from_odin.so
+    silent: true
 
 interval: 250ms
