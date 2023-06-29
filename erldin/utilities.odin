@@ -20,7 +20,16 @@ NoEnvironmentVariableSet :: struct {
 foreign import erldin "erldin_nif.h"
 foreign erldin {
   enif_make_binary :: proc(env: ^ErlNifEnv, bin: ^ErlNifBinary) -> ERL_NIF_TERM ---
+  enif_make_badarg :: proc(env: ^ErlNifEnv) -> ERL_NIF_TERM ---
+  enif_make_int :: proc(env: ^ErlNifEnv, i: c.int) -> ERL_NIF_TERM ---
+  enif_make_ulong :: proc(env: ^ErlNifEnv, i: c.ulong) -> ERL_NIF_TERM ---
+  enif_make_double :: proc(env: ^ErlNifEnv, d: c.double) -> ERL_NIF_TERM ---
+  enif_make_atom :: proc(env: ^ErlNifEnv, name: cstring) -> ERL_NIF_TERM ---
+  enif_make_existing_atom :: proc(env: ^ErlNifEnv, name: cstring, atom: ^ERL_NIF_TERM, encoding: c.uint) -> c.int ---
+  enif_make_tuple :: proc(env: ^ErlNifEnv, n: c.uint, #c_vararg terms: ..ERL_NIF_TERM) -> ERL_NIF_TERM ---
   enif_make_string :: proc(env: ^ErlNifEnv, string: cstring, encoding: c.uint) -> ERL_NIF_TERM ---
+
+  enif_get_int :: proc(env: ^ErlNifEnv, term: ERL_NIF_TERM, ip: ^c.int) -> c.int ---
 }
 
 ErlNifBinary :: struct {

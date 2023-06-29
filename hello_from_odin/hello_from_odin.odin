@@ -1,12 +1,17 @@
 package hello_from_odin
 
 import "core:c"
+import "core:runtime"
 
 import "../erldin"
 
 entry := erldin.ErlNifEntry{}
 
-hello :: proc "c" (env: ^erldin.ErlNifEnv, argc: c.int, argv: [^]cstring) -> erldin.ERL_NIF_TERM {
+hello :: proc "c" (
+  env: ^erldin.ErlNifEnv,
+  argc: c.int,
+  argv: [^]erldin.ERL_NIF_TERM,
+) -> erldin.ERL_NIF_TERM {
   return erldin.enif_make_string(
     env,
     "Hello World from Odin!",
@@ -14,8 +19,33 @@ hello :: proc "c" (env: ^erldin.ErlNifEnv, argc: c.int, argv: [^]cstring) -> erl
   )
 }
 
+hello_binary :: proc "c" (
+  env: ^erldin.ErlNifEnv,
+  argc: c.int,
+  argv: [^]erldin.ERL_NIF_TERM,
+) -> erldin.ERL_NIF_TERM {
+  context = runtime.default_context()
+  int_value := c.int(0)
+  if erldin.enif_get_int(env, argv[0], &int_value) == 0 {
+    return erldin.enif_make_badarg(env)
+  }
+
+  bytes := make([]u8, int_value)
+  for &c in bytes {
+    c = 'a'
+  }
+  binary := erldin.ErlNifBinary {
+    size = c.size_t(int_value),
+    data = raw_data(bytes),
+  }
+  binary_value := erldin.enif_make_binary(env, &binary)
+
+  return binary_value
+}
+
 nif_functions := [?]erldin.ErlNifFunc{
   {name = "hello", arity = 0, fptr = erldin.Nif(hello), flags = 0},
+  {name = "hello_binary", arity = 1, fptr = erldin.Nif(hello_binary), flags = 0},
 }
 
 @(export)
