@@ -19,7 +19,15 @@ NoEnvironmentVariableSet :: struct {
 
 foreign import erldin "erldin_nif.h"
 foreign erldin {
+  enif_make_binary :: proc(env: ^ErlNifEnv, bin: ^ErlNifBinary) -> ERL_NIF_TERM ---
   enif_make_string :: proc(env: ^ErlNifEnv, string: cstring, encoding: c.uint) -> ERL_NIF_TERM ---
+}
+
+ErlNifBinary :: struct {
+  size:      c.size_t,
+  data:      [^]u8,
+  ref_bin:   rawptr,
+  __spare__: [2]rawptr,
 }
 
 ErlNifResourceTypeInit :: struct {
