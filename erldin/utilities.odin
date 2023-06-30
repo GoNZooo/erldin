@@ -29,7 +29,7 @@ foreign erldin {
   enif_make_tuple :: proc(env: ^ErlNifEnv, n: c.uint, #c_vararg terms: ..ERL_NIF_TERM) -> ERL_NIF_TERM ---
   enif_make_string :: proc(env: ^ErlNifEnv, string: cstring, encoding: c.uint) -> ERL_NIF_TERM ---
 
-  enif_get_int :: proc(env: ^ErlNifEnv, term: ERL_NIF_TERM, ip: ^c.int) -> c.int ---
+  enif_get_int :: proc(env: ^ErlNifEnv, term: ERL_NIF_TERM, ip: ^c.int) -> b32 ---
 }
 
 ErlNifBinary :: struct {
@@ -65,7 +65,7 @@ ErlNifEntry :: struct {
 
 ErlNifEnv :: rawptr
 
-ERL_NIF_TERM :: c.uint
+ERL_NIF_TERM :: u64
 
 LoadFunction :: proc(env: ^ErlNifEnv, priv_data: [^]rawptr, load_info: ERL_NIF_TERM) -> c.int
 

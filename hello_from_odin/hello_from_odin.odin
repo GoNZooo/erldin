@@ -26,7 +26,7 @@ hello_binary :: proc "c" (
 ) -> erldin.ERL_NIF_TERM {
   context = runtime.default_context()
   int_value := c.int(0)
-  if erldin.enif_get_int(env, argv[0], &int_value) == 0 {
+  if !erldin.enif_get_int(env, argv[0], &int_value) {
     return erldin.enif_make_badarg(env)
   }
 
